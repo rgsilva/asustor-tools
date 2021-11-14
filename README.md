@@ -22,6 +22,8 @@ DEALINGS IN THE SOFTWARE.
 
 ## fan-control
 
+Background story: [Reverse engineering and fine-tuning Asustor NAS fans](https://blog.rgsilva.com/reverse-engineering-and-fine-tuning-asustor-nas-fans/)
+
 This is a simple tool to provide you a better control of your NAS fans. For some reason
 these devices can get hotter than normal and somehow the OS is not properly controlling
 the fans, so this tool can help with that. Or you just want your NAS to be really quiet,
@@ -38,7 +40,9 @@ curve: comma-separated temp:pwm ordered by temp
   ex:  30:0,40:50,50:100,60:150,70:255
 ```
 
-It's not a daemon yet, so you need to run this inside a screen or something.
+It's not a daemon yet, so you need to run this inside a screen or something. It also requires
+firmware version 4.0.0.RN3 or similar/higher because you need to link to `libnhal.so` with
+the function `Hal_Disk_Get_Temperature` exported. It was tested only on an AS3104T.
 
 ### Missing features
 

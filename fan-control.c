@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
   signal(SIGQUIT, signalHandler);
   signal(SIGTERM, signalHandler);
 
-  uint fan_pwm = 0 & 0xFF;
+  int fan_pwm = 0 & 0xFF;
 
   while (keepRunning) {
     int fansPwm[MAX_FANS] = {-1};
@@ -224,6 +224,10 @@ int main(int argc, char *argv[]) {
       printf("Average system temperature: %d\n", avgTemp);
       checkTemp = 1;
       fan_pwm = tempToPwm(avgTemp);
+      if (fan_pwm == -1) {
+        printf("Unknown point in the curve! Using the first.\n");
+        fan_pwm = curve[0].pwm;
+      }
     }
 
     // Check if we must update the fan speeds.
