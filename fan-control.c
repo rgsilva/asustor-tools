@@ -213,17 +213,12 @@ int main(int argc, char *argv[]) {
   signal(SIGQUIT, signalHandler);
   signal(SIGTERM, signalHandler);
 
-  int fan_index = atoi(argv[1]);
   uint fan_pwm = 0 & 0xFF;
 
   while (keepRunning) {
-    uint current_pwm = 0;
-    int retval = Hal_Fan_Get_Raw_Value(fan_index, &current_pwm);
-    if (retval != 0) {
-      printf("FAILED: return value is %d\n", retval);
-      continue;
-    }
+    int fansPwm[MAX_FANS] = {-1};
 
+    // Check the current average system temperature.
     if (checkTemp == 0 || checkTemp == CHECK_TEMP_INTERVAL) {
       int avgTemp = averageTemp();
       printf("Average system temperature: %d\n", avgTemp);
@@ -231,15 +226,36 @@ int main(int argc, char *argv[]) {
       fan_pwm = tempToPwm(avgTemp);
     }
 
-    if (current_pwm != fan_pwm) {
-      printf("Setting fan %d PWM value to %u\n", fan_index, fan_pwm);
+    // Check if we must update the fan speeds.
+    int mustUpdate = 0;
+    for (int i = 0; i < MAX_FANS; i++) {
+      if (fans[i] == -1) { continue; }
 
-      retval = Hal_Fan_Set_Raw_Value(fan_index, fan_pwm);
+      uint current_pwm = 0;
+      int retval = Hal_Fan_Get_Raw_Value(fans[i], &current_pwm);
       if (retval != 0) {
         printf("FAILED: return value is %d\n", retval);
-        continue;
+      }
+      mustUpdate |= (current_pwm != fan_pwm);
+    }
+
+    // Update if we must.
+    if (mustUpdate) {
+      for (int i = 0; i < MAX_FANS; i++) {
+        if (fans[i] == -1) { break; }
+
+        int fan_index = fans[i];
+        printf("Setting fan %d PWM value to %u\n", fan_index, fan_pwm);
+
+        int retval = Hal_Fan_Set_Raw_Value(fan_index, fan_pwm);
+        if (retval != 0) {
+          printf("FAILED: return value is %d\n", retval);
+          continue;
+        }
       }
     }
+
+    // Sleep
     usleep(sleepTime);
   }
   printf("Process exited gracefully\n");
