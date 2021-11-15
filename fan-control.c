@@ -190,11 +190,18 @@ int averageTemp() {
 }
 
 int tempToPwm(int temp) {
+  if (temp < curve[0].temp) {
+    return curve[0].pwm;
+  }
+
   for (int i = 0; i < MAX_CURVE-1; i++) {
-    if (curve[i].temp <= temp && curve[i+1].temp >= temp) {
+    if (curve[i].temp <= temp && (
+      curve[i+1].temp >= temp || curve[i+1].temp == -1
+    )) {
       return curve[i].pwm;
     }
   }
+
   return -1;
 }
 
@@ -225,7 +232,7 @@ int main(int argc, char *argv[]) {
       checkTemp = 1;
       fan_pwm = tempToPwm(avgTemp);
       if (fan_pwm == -1) {
-        printf("Unknown point in the curve! Using the first.\n");
+        printf("WARN: unknown point in the curve! This should not happen! Using the first one to avoid fire!\n");
         fan_pwm = curve[0].pwm;
       }
     }
