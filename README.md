@@ -37,7 +37,7 @@ fans:  comma-separated fan indexes
 sleep: nanoseconds to sleep between each PWM check
   ex:  10000
 curve: comma-separated temp:pwm ordered by temp
-  ex:  30:0,40:50,50:100,60:150,70:255
+  ex:  30:25,40:50,50:100,60:150,70:255
 ```
 
 It's not a daemon yet, so you need to run this inside a screen or something. It also requires
